@@ -12,9 +12,8 @@ __asm__(    \
     "mov %ax, %cs\n\t"      \
     "mov %ax, %ss\n\t"      \
     "mov $0x7BFF, %sp\n\t"  \
-    "jmp $0x0000, $bootsector_main\n" \
+    "jmp $0x0000, $bootsector_main\n\t" \
 )
-
 
 // Colors in BIOS print char
 enum {
@@ -37,7 +36,7 @@ enum {
 };
 
 #define FN_BIOS_SET_CURSOR_POS__ROW_COL \
-void asm_set_cursor_pos_row_col() {\
+void asm_set_cursor_pos__row_col() {\
     __asm__ volatile (\
         "pushal\n\t"\
         "xor %%bh, %%bh\n\t"\
@@ -84,7 +83,7 @@ void asm_print_string__msg_color() {\
         "int $0x10\n\t"\
         /* Move cursor forward */\
         "movb $0x03, %%ah\n\t"   /* BIOS get cursor position, result col in %dl */\
-        "movb $0, %%bh\n\t"      /* Page number 0 */\
+        "xor %%bh, %%bh\n\t"      /* Page number 0 */\
         "int $0x10\n\t"\
         "inc %%dl\n\t"           /* Increment column (move cursor forward) */\
         "movb $0x02, %%ah\n\t"   /* BIOS set cursor position */\
@@ -168,12 +167,12 @@ void asm_print_address_as_hex() {\
 #define BIOS_SET_CURSOR_POS__ROW_COL(row, col) \
     do {\
         _asm_char_1_ = row;  _asm_char_2_ = col;\
-        asm_set_cursor_pos_row_col();\
+        asm_set_cursor_pos__row_col();\
     } while (0)
 
 #define BIOS_SET_PRINT_COLOR__COLOR(color) \
-    do {    \
-        _asm_char_1_ = color;    \
+    do {\
+        _asm_char_1_ = color;\
     } while(0)
 
 #define BIOS_PRINT_STRING__MSG_COLOR(msg, color)\
@@ -195,5 +194,9 @@ volatile const char* _asm_msg_
 
 #define DATA_ADV_MSG \
 const char ADV_MSG[] = "GitHub:PegasusPlus/tinyos"
+
+#define END_BOOTSECTOR \
+__asm__(".section .boot_signature\n"\
+        ".byte 0x55, 0xAA\n");
 
 #endif

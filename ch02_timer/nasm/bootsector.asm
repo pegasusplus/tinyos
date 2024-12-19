@@ -13,10 +13,10 @@ start:
 
     cli                     ; Disable interrupts
 
-    ; Set up the stack
-    xor ax, ax
-    mov ss, ax
-    mov sp, 0x7C00
+    ;; Set up the stack
+    ;xor ax, ax
+    ;mov ss, ax
+    ;mov sp, 0x7C00
 
     ; Remap PIC
     mov al, 0x11           ; Initialize command
